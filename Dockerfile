@@ -37,6 +37,10 @@ RUN mkdir -p "${SYNAPSE_ETC}/stackfix" && gcc -shared -fPIC ${CFLAGS} stack.c -o
 # cleanup
 RUN apk del --no-cache --purge -r ${SYNAPSE_BUILD_DEPENDENCIES} && rm -rf /tmp /var/cache
 
+# add entrypoint
+ADD entrypoint.sh /bin/docker-entrypoint
+RUN chmod 0755 /bin/docker-entrypoint
+
 # set user and workind directory
 USER ${SYNAPSE_USER}
 WORKDIR ${SYNAPSE_DATA_DIR}
