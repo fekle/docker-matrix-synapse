@@ -2,7 +2,7 @@ FROM alpine:3.6
 WORKDIR /tmp
 
 # variables
-ENV CFLAGS="-march=native -O3 -pipe -fstack-protector-strong"
+ENV CFLAGS="-mtune=intel -O3 -pipe -fstack-protector-strong"
 ENV CXXFLAGS="${CFLAGS}"
 ENV SYNAPSE_VERSION="0.25.1"
 ENV SYNAPSE_SRC_URL="https://github.com/matrix-org/synapse/archive/v${SYNAPSE_VERSION}.tar.gz"
@@ -37,7 +37,7 @@ RUN mkdir -p "${SYNAPSE_ETC}/stackfix" && gcc -shared -fPIC ${CFLAGS} stack.c -o
 # cleanup
 RUN apk del --no-cache --purge -r ${SYNAPSE_BUILD_DEPENDENCIES} && rm -rf /tmp /var/cache
 
-# add entrypoint
+# add entrypoi
 ADD entrypoint.sh /bin/docker-entrypoint
 RUN chmod 0755 /bin/docker-entrypoint
 
@@ -50,6 +50,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 CMD ["wg
 
 # use tini with entrypoint, set start command
 ENTRYPOINT ["/sbin/tini", "--", "/bin/docker-entrypoint"]
-CMD ["env", "LD_PRELOAD='${SYNAPSE_ETC}/stackfix/stack.so'", \
-  "python2", "-m", "synapse.app.homeserver", "-c", "${SYNAPSE_CONFIG_FILE}", \
-  "--report-stats", "no"]
+CMD ["start"]

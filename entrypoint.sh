@@ -5,10 +5,12 @@ cd "${SYNAPSE_DATA_DIR}"
 
 case "${1:-}" in
 start)
+  printf 'starting matrix-synapse at %s\n' "$(date)"
   rm -rf homeserver.pid &>/dev/null || true
-  exec env LD_PRELOAD="${SYNAPSE_DATA_DIR}/stack.so" python2 -m synapse.app.homeserver -c "${SYNAPSE_CONFIG_FILE}" --report-stats no
+  env LD_PRELOAD="${SYNAPSE_ETC}/stackfix/stack.so" python2 -m synapse.app.homeserver -c "${SYNAPSE_CONFIG_FILE}" --report-stats no
   ;;
 bash)
+  printf 'starting bash at %s\n' "$(date)"
   exec bash ${@:2}
   ;;
 *)
