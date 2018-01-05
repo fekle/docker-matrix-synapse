@@ -14,7 +14,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
     pthread_attr_init(&local);
     attr = &local;
   }
-  pthread_attr_setstacksize((void*)attr, 2 * 1024 * 1024);
+  pthread_attr_setstacksize((void*)attr, 4 * 1024 * 1024);
 
   func_t orig = (func_t)dlsym(RTLD_NEXT, "pthread_create");
 
