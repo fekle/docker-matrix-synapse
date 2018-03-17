@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM ubuntu:rolling
 WORKDIR /tmp
 
 # variables
@@ -17,16 +17,11 @@ ENV SYNAPSE_LOG_FILE="${SYNAPSE_DATA_DIR}/homeserver.log"
 ENV SYNAPSE_HEALTHCHECK_URL="https://localhost:8448/_matrix/client/versions"
 ENV SYNAPSE_DEPENDENCIES="ca-certificates bash python-pip python-lxml python openssl"
 ENV SYNAPSE_BUILD_DEPENDENCIES="gcc libffi-dev libjpeg-turbo8-dev libtool libxml2-dev libxslt-dev libzip-dev make python-dev"
-ENV SYNAPSE_PIP_DEPENDENCIES="psycopg2 lxml"
+ENV SYNAPSE_PIP_DEPENDENCIES="psycopg2-binary lxml"
 
 # add synapse user
 RUN groupadd -g ${SYNAPSE_GID} ${SYNAPSE_GROUP} && \
   useradd -r -g ${SYNAPSE_GROUP} -u ${SYNAPSE_UID} ${SYNAPSE_USER}
-
-# Add Tini
-ENV TINI_VERSION v0.17.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
 
 # install dependencies
 RUN apt-get update && apt-get install -y ${SYNAPSE_DEPENDENCIES} ${SYNAPSE_BUILD_DEPENDENCIES}
@@ -50,5 +45,5 @@ WORKDIR ${SYNAPSE_DATA_DIR}
 HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 CMD ["wget", "-q", "${SYNAPSE_HEALTHCHECK_URL}"]
 
 # use tini with entrypoint, set start command
-ENTRYPOINT ["/tini", "--", "/bin/docker-entrypoint"]
+ENTRYPOINT ["/bin/docker-entrypoint"]
 CMD ["start"]

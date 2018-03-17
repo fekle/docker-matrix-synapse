@@ -6,7 +6,7 @@ name="fekle/matrix-synapse"
 tags=("${name}:$(<VERSION)" "${name}:latest")
 
 # allow to disable cache
-if [[ "${aa:-}" == "nocache" ]]; then extra="--no-cache"; fi
+if [[ "${1:-}" == "nocache" ]]; then extra="--no-cache"; fi
 
 # build
 docker build --pull --tag ${tags[0]} --tag ${tags[1]} ${extra:-} .
