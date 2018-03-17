@@ -1,23 +1,16 @@
-FROM ubuntu:rolling
+FROM ubuntu:rolling AS build
 WORKDIR /tmp
 
 # variables
-ENV CFLAGS="-mtune=intel -O3 -pipe -fstack-protector-strong"
-ENV CXXFLAGS="${CFLAGS}"
-ENV SYNAPSE_VERSION="0.26.1"
-ENV SYNAPSE_SRC_URL="https://github.com/matrix-org/synapse/archive/v${SYNAPSE_VERSION}.tar.gz"
-ENV SYNAPSE_DATA_DIR="/synapse-data"
-ENV SYNAPSE_ETC_DIR="/etc/synapse"
-ENV SYNAPSE_UID=3000
-ENV SYNAPSE_GID=3000
-ENV SYNAPSE_USER=synapse
-ENV SYNAPSE_GROUP=synapse
-ENV SYNAPSE_CONFIG_FILE="${SYNAPSE_DATA_DIR}/homeserver.yaml"
-ENV SYNAPSE_LOG_FILE="${SYNAPSE_DATA_DIR}/homeserver.log"
-ENV SYNAPSE_HEALTHCHECK_URL="https://localhost:8448/_matrix/client/versions"
-ENV SYNAPSE_DEPENDENCIES="ca-certificates bash python-pip python-lxml python openssl"
-ENV SYNAPSE_BUILD_DEPENDENCIES="gcc libffi-dev libjpeg-turbo8-dev libtool libxml2-dev libxslt-dev libzip-dev make python-dev"
-ENV SYNAPSE_PIP_DEPENDENCIES="psycopg2-binary lxml"
+ENV SYNAPSE_VERSION="0.27.0-rc1"\
+    SYNAPSE_DATA_DIR="/synapse-data" \
+    SYNAPSE_UID=3000 SYNAPSE_GID=3000 SYNAPSE_USER=synapse SYNAPSE_GROUP=synapse \
+    SYNAPSE_DEPENDENCIES="ca-certificates bash python-pip python-lxml python-psycopg2 python openssl" \
+    SYNAPSE_BUILD_DEPENDENCIES="gcc libffi-dev libjpeg-turbo8-dev libtool libxml2-dev libxslt-dev libzip-dev make python-dev" \
+    CFLAGS="-mtune=intel -O2 -pipe"
+
+ENV SYNAPSE_SRC_URL="https://github.com/matrix-org/synapse/archive/v${SYNAPSE_VERSION}.tar.gz" \
+    CXXFLAGS="${CFLAGS}"
 
 # add synapse user
 RUN groupadd -g ${SYNAPSE_GID} ${SYNAPSE_GROUP} && \
@@ -27,13 +20,18 @@ RUN groupadd -g ${SYNAPSE_GID} ${SYNAPSE_GROUP} && \
 RUN apt-get update && apt-get install -y ${SYNAPSE_DEPENDENCIES} ${SYNAPSE_BUILD_DEPENDENCIES}
 
 # install synapse
-RUN pip2 install --upgrade --compile pip && pip2 install --upgrade --compile "${SYNAPSE_SRC_URL}" && pip2 install --upgrade --compile ${SYNAPSE_PIP_DEPENDENCIES} && \
-  mkdir -p "${SYNAPSE_ETC_DIR}" && printf "${SYNAPSE_VERSION}" > "${SYNAPSE_ETC_DIR}/version"
+RUN pip2 install --upgrade --compile pip && pip2 install --upgrade --compile "${SYNAPSE_SRC_URL}"
 
 # cleanup
-RUN apt-get purge -y ${SYNAPSE_BUILD_DEPENDENCIES} && apt-get clean -y && apt-get autoclean -y && apt-get autoremove -y && cd / && rm -rf /tmp /var/cache /root/.cache /home/*/.cache
+RUN apt-get purge -y ${SYNAPSE_BUILD_DEPENDENCIES} && apt-get autoremove -y && apt-get clean -y && apt-get autoclean -y && cd / \
+ && rm -rf /tmp /var/cache /root/.cache /home/*/.cache /var/lib/apt /usr/share/man /usr/share/doc
 
-# add entrypoi
+FROM ubuntu:rolling
+COPY --from=build / /
+ENV SYNAPSE_USER=synapse SYNAPSE_DATA_DIR="/synapse-data" SYNAPSE_HEALTHCHECK_URL="https://localhost:8448/_matrix/client/versions"
+ENV SYNAPSE_CONFIG_FILE="${SYNAPSE_DATA_DIR}/homeserver.yaml" SYNAPSE_LOG_FILE="${SYNAPSE_DATA_DIR}/homeserver.log"
+
+# add entrypoint
 ADD entrypoint.sh /bin/docker-entrypoint
 RUN chmod 0755 /bin/docker-entrypoint
 
