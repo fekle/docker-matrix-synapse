@@ -1,0 +1,17 @@
+sudo: required
+
+language: generic
+
+branches:
+  only:
+  - master
+
+services:
+  - docker
+
+before_script:
+  - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+script:
+  - set -euf
+  - ./build.sh
