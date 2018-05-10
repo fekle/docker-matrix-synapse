@@ -1,8 +1,8 @@
-FROM ubuntu:latest AS build
+FROM ubuntu:18.04 AS build
 WORKDIR /tmp
 
 # variables
-ENV SYNAPSE_VERSION='0.27.4' \
+ENV SYNAPSE_VERSION='0.28.1' \
   SYNAPSE_DIR='/synapse' \
   SYNAPSE_DATA_DIR='/synapse-data' \
   SYNAPSE_UID='3000' SYNAPSE_GID='3000' SYNAPSE_USER='synapse' SYNAPSE_GROUP='synapse' \
@@ -18,7 +18,7 @@ RUN groupadd -g "${SYNAPSE_GID}" "${SYNAPSE_GROUP}" && \
 
 # install dependencies
 RUN apt-get update && apt-get install -y ${SYNAPSE_DEPENDENCIES} ${SYNAPSE_BUILD_DEPENDENCIES}
-RUN pip install --upgrade --compile pip 
+RUN pip install --upgrade --compile pip
 RUN pip install --upgrade --compile setuptools
 RUN pip install --upgrade --compile ${SYNAPSE_PIP_DEPENDENCIES}
 
@@ -29,13 +29,13 @@ RUN pip --no-cache-dir install --upgrade --compile "${SYNAPSE_DIR}" && \
   chown -R "${SYNAPSE_USER}:${SYNAPSE_GROUP}" "${SYNAPSE_DIR}"
 
 # cleanup
-RUN apt-get purge -y ${SYNAPSE_BUILD_DEPENDENCIES} && apt-get autoremove -y && apt-get clean -y && apt-get autoclean -y 
+RUN apt-get purge -y ${SYNAPSE_BUILD_DEPENDENCIES} && apt-get autoremove -y && apt-get clean -y && apt-get autoclean -y
 RUN rm -rf /tmp /var/cache /root/.cache /home/*/.cache /var/lib/apt /usr/share/man /usr/share/doc
 
 # compile all python packages
 RUN /usr/bin/python2.7 -O -m compileall
 
-FROM ubuntu:latest
+FROM ubuntu:18.04
 COPY --from=build / /
 ENV SYNAPSE_USER='synapse' SYNAPSE_GROUP='synapse' SYNAPSE_DIR='/synapse' SYNAPSE_DATA_DIR='/synapse-data' SYNAPSE_HEALTHCHECK_URL='https://localhost:8448/_matrix/client/versions'
 ENV SYNAPSE_CONFIG_FILE="${SYNAPSE_DATA_DIR}/homeserver.yaml" SYNAPSE_LOG_FILE="${SYNAPSE_DATA_DIR}/homeserver.log"
