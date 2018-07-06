@@ -2,7 +2,7 @@ FROM ubuntu:18.04 AS build
 WORKDIR /tmp
 
 # variables
-ENV SYNAPSE_VERSION='0.28.1' \
+ENV SYNAPSE_VERSION='0.32.1' \
   SYNAPSE_DIR='/synapse' \
   SYNAPSE_DATA_DIR='/synapse-data' \
   SYNAPSE_UID='3000' SYNAPSE_GID='3000' SYNAPSE_USER='synapse' SYNAPSE_GROUP='synapse' \

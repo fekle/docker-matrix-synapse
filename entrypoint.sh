@@ -17,7 +17,7 @@ case "${1:-}" in
       rm -rf "${SYNAPSE_DATA_DIR}/homeserver.pid" || true
     fi
 
-    chroot --skip-chdir --userspec="${SYNAPSE_USER}" / /usr/bin/python2.7 -OO -m synapse.app.homeserver -c "${SYNAPSE_CONFIG_FILE}" --report-stats no
+    chroot --skip-chdir --userspec="${SYNAPSE_USER}" / /usr/bin/python2.7 -O -m synapse.app.homeserver -c "${SYNAPSE_CONFIG_FILE}" --report-stats no
     ;;
   bash)
     printf 'starting bash at %s\n' "$(date)"
