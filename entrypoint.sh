@@ -8,7 +8,7 @@ start)
   printf 'updating permissions...\n'
   mkdir -p "${SYNAPSE_DATA_DIR}"
   du -hd1 "${SYNAPSE_DATA_DIR}"
-  chown -R "${SYNAPSE_USER}:${SYNAPSE_GROUP}" "${SYNAPSE_DATA_DIR}" "${SYNAPSE_DIR}"
+  chown -R "${SYNAPSE_USER}:${SYNAPSE_USER}" "${SYNAPSE_DATA_DIR}" "${SYNAPSE_DIR}"
   chmod 0775 "${SYNAPSE_DATA_DIR}" "${SYNAPSE_DIR}"
 
   printf 'starting matrix-synapse at %s\n' "$(date)"
@@ -17,7 +17,7 @@ start)
     rm -rf "${SYNAPSE_DATA_DIR}/homeserver.pid" || true
   fi
 
-  chroot --skip-chdir --userspec="${SYNAPSE_USER}" / /usr/bin/python2.7 -O -m synapse.app.homeserver -c "${SYNAPSE_CONFIG_FILE}" --report-stats no
+  chroot --skip-chdir --userspec="${SYNAPSE_USER}:${SYNAPSE_USER}" / /usr/bin/python2.7 -O -m synapse.app.homeserver -c "${SYNAPSE_DATA_DIR}/${SYNAPSE_CONFIG_FILE}" --report-stats no
   ;;
 bash)
   printf 'starting bash at %s\n' "$(date)"
