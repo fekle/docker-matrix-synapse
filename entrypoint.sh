@@ -17,6 +17,9 @@ start)
     rm -rf "${SYNAPSE_DATA_DIR}/homeserver.pid" || true
   fi
 
+  # compile all python packages
+  /usr/bin/python2.7 -O -m compileall >/dev/null
+
   chroot --skip-chdir --userspec="${SYNAPSE_USER}:${SYNAPSE_USER}" / /usr/bin/python2.7 -O -m synapse.app.homeserver -c "${SYNAPSE_DATA_DIR}/${SYNAPSE_CONFIG_FILE}" --report-stats no
   ;;
 bash)
